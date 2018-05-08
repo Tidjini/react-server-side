@@ -1,45 +1,57 @@
 # react-server-side
 
-## next
+## next more server config
 
-    add the server webpack configuration (out of src folder) create webpack.server.js file
-    first informe the webpack that we build bundle for server (nodeJS) side rather then the browser side
-    module.exports = {
-        target : "node",
-    };
+    1/ add the --watch flag into the config dev:build:server script to tell webpack to watch evry change in js files
+        restart the server each the bundle.js change with nodemon
+        dev:server : "nodemon --watch build --exec \"node build/bundle.js\"",
+        commit with "webpack nodemon server watch mode"
+    2/ convert the server side requiring library to import statement (universal/isomorphic javascript : same code in browser as server)
+        commit with "turn to univrsal/isomorphic javascript in server side"
+    3/ change the Home component to execute some dynamic code + config client side
+        <div>
+            <div>Welcome home</div>
+            <Button onClick={() => {console.log("hi there")}}> Press Me</Button>
+        </div>
+        create a webpack.client.js to config the client side:
+            copy and past from server side:
+                remove target //cause we targeting the browser here
+                and change:
+                    entry: "./src/client/client.js", // add it in to client folder (in prod u can call it index.js)
+                    output: {
+                        filename: "bundle.js",
+                        path: path.resolve(__dirname, "public")
+                    },
+            client.js :
+                console.log("this is the entry point of client");
 
-    second specify the entry point of the server application
-    ..
-        entry : "./src/index.js",
-    ..
+        create the "dev:build:client": "webpack --config webpack.client.js --watch " script in package.json
 
-    3/ tell webpack where to put the generated build file (bundle.js)
-    ..
-        output: {
-            filename: "bundle.js",
-            path: path.resolve(__dirname, "build") => require the path module (const path = require("path"))
-        },
-    ..  
-    4/ tell webpack to run babel on each js file and get the ES5 js
-    ..
-        module :{
-            rules:[
-                {
-                    test: /\.js?$/, // check all js files (do not get html or css or other files)
-                    loader: 'babel-loader', //run the babel loader
-                    exclude: /node_modules/, //do not run on node modules
-                    options: {
-                        presets:[
-                            'react',  //to convert JSX => JS
-                            'stage-0',  //for some async staff
-                            ['env', {target: {browsers: ['last 2 versions']}}]
-                        ]
-                    }
-                }
-            ]
-        }
+        commit with "configuration client side to get dynamic process on the browser (not just raw html)"
 
-## next
+    4/use the public directory inside the application
+        in src/index.js:
+            app.use(express.static("public"));
+            ..
+                const content = renderToString(<Home/>);
 
-    add the build script to the script section in package.json file
-        "dev:build:server" : "webpack --config webpack.server.js"
+                const html = `
+                    <html>
+                        <head></head>
+                        <body>
+                            <div>${content}</div>
+                            <script src="bundle.js"></>
+                        </body>
+                    </html>
+                `;
+
+                res.send(html);
+            ..
+        commit "add the public directory (contain the dynamic js file) to the app"
+    5/create the react client bootsup
+        src/client/client.js:
+            import React form "..";
+            import ReactDom from "..";
+            import Home from "..";
+            //add the root id to index.js (server side) <div id="root">${content}</div>
+            RactDom.render(<Home />, document.querySelector("#root"));
