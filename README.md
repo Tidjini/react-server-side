@@ -1,57 +1,82 @@
 # react-server-side
 
-## next more server config
+## next refectoring for cleaner code
 
-    1/ add the --watch flag into the config dev:build:server script to tell webpack to watch evry change in js files
-        restart the server each the bundle.js change with nodemon
-        dev:server : "nodemon --watch build --exec \"node build/bundle.js\"",
-        commit with "webpack nodemon server watch mode"
-    2/ convert the server side requiring library to import statement (universal/isomorphic javascript : same code in browser as server)
-        commit with "turn to univrsal/isomorphic javascript in server side"
-    3/ change the Home component to execute some dynamic code + config client side
-        <div>
-            <div>Welcome home</div>
-            <Button onClick={() => {console.log("hi there")}}> Press Me</Button>
-        </div>
-        create a webpack.client.js to config the client side:
-            copy and past from server side:
-                remove target //cause we targeting the browser here
-                and change:
-                    entry: "./src/client/client.js", // add it in to client folder (in prod u can call it index.js)
-                    output: {
-                        filename: "bundle.js",
-                        path: path.resolve(__dirname, "public")
-                    },
-            client.js :
-                console.log("this is the entry point of client");
+    1/ to not duplicate code of webpack babel config in client and server side config we use webpack-merge library
+        - first create the webpack.base.js for base config:
+            module.exports = {
+                module: {
+                    rules: [
+                        {
+                            test: /\.js?$/,
+                            loader: "babel-loader",
+                            exclude: /node_modules/,
+                            options: {
+                            presets: [
+                                "react",
+                                "stage-0",
+                                ["env", { target: { browsers: ["last 2 versions"] } }]
+                            ]
+                            }
+                        }
+                    ]
+                }
+            }
+        -second add the merge and base file to both client/server configs
+            const merge = require("webpack-merge");
+            const baseConfig = require("./webpack.base.js");
+            const config = {...}
+            module.exports = merge(baseConfig, config);
+    --check--
+    commit -m "merging webpack config";
 
-        create the "dev:build:client": "webpack --config webpack.client.js --watch " script in package.json
 
-        commit with "configuration client side to get dynamic process on the browser (not just raw html)"
+    2/ npm-run-all lib to run multiple script inside the script section of package.json
+        "dev" :"npm-run-all --parallel dev:*", //to not confuse the npm run all rename dev:build:server/client => dev:build-server/client
+        --check--
+        commit -m "Single script startup";
 
-    4/use the public directory inside the application
-        in src/index.js:
-            app.use(express.static("public"));
-            ..
-                const content = renderToString(<Home/>);
+    3/webpack-node-externals to escape to bundle the require files like react/express/react-dom (in server side)
+        in webpack.server.js:
+            const webpackNodeExternals = require("webpack-node-externals");
 
-                const html = `
+            const config = {
+                ..
+                ..
+                externals : [webpackNodeExternals()] //so any thing inside node_modules do not bundle it
+            }
+        --check-
+        commit 'Ignoring files with webpack (server side)';
+    4/create a helper file called renderer inside Helpers folder to handle the render function for the Home compo
+        helpers/renderer.js :
+            import React from "react";
+            import { renderToString } from "react-dom/server";
+            import Home from "../client/components/Home";
+
+            export default () => {
+                const content = renderToString(<Home />);
+                return `
                     <html>
-                        <head></head>
-                        <body>
-                            <div>${content}</div>
-                            <script src="bundle.js"></>
-                        </body>
+                    <head></head>
+                    <body>
+                        <div id="root">${content}</div>
+                        <script src="bundle.js"></script>
+                    </body>
                     </html>
-                `;
 
-                res.send(html);
-            ..
-        commit "add the public directory (contain the dynamic js file) to the app"
-    5/create the react client bootsup
-        src/client/client.js:
-            import React form "..";
-            import ReactDom from "..";
-            import Home from "..";
-            //add the root id to index.js (server side) <div id="root">${content}</div>
-            RactDom.render(<Home />, document.querySelector("#root")); => hydrate
+                `;
+            }
+        in index.js
+            clear :
+                import React from "react";
+                import { renderToString } from "react-dom/server";
+                import Home from "./client/components/Home";
+            add :
+                import renderer from "./helpers/renderer";
+
+                ...
+
+                res.send(renderer());
+                ...
+
+            commit "Renderer helper"

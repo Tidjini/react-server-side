@@ -1,6 +1,8 @@
 const path = require("path");
+const merge = require("webpack-merge");
+const baseConfig = require("./webpack.base");
 
-module.exports = {
+const config = {
   //targeting the node js instead the browser we need to transform JSX, and JS in server side
   target: "node",
 
@@ -11,23 +13,7 @@ module.exports = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "build")
-  },
-
-  //tell webpack to convert each JSX file and turn in to ES5
-  module: {
-    rules: [
-      {
-        test: /\.js?$/,
-        loader: "babel-loader",
-        exclude: /node_modules/,
-        options: {
-          presets: [
-            "react",
-            "stage-0",
-            ["env", { target: { browsers: ["last 2 versions"] } }]
-          ]
-        }
-      }
-    ]
   }
 };
+
+module.exports = merge(baseConfig, config);
