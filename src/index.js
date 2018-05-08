@@ -7,7 +7,7 @@ app.use(express.static("public"));
 
 //handle the root get request
 app.get("/", (req, res) => {
-  res.send(renderer());
+  res.send(renderer(req));
 });
 
 app.listen(3000, () => {
