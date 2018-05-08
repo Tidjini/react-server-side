@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:server": "nodemon --watch build --exec \"node build/bundle.js\"",
+    "dev:build:client": "webpack --config webpack.client.js --watch",
     "dev:build:server": "webpack --config webpack.server.js --watch"
   },
   "dependencies": {
