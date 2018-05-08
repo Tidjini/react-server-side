@@ -1,82 +1,77 @@
 # react-server-side
 
-## next refectoring for cleaner code
+## next Adding navigation
 
-    1/ to not duplicate code of webpack babel config in client and server side config we use webpack-merge library
-        - first create the webpack.base.js for base config:
-            module.exports = {
-                module: {
-                    rules: [
-                        {
-                            test: /\.js?$/,
-                            loader: "babel-loader",
-                            exclude: /node_modules/,
-                            options: {
-                            presets: [
-                                "react",
-                                "stage-0",
-                                ["env", { target: { browsers: ["last 2 versions"] } }]
-                            ]
-                            }
-                        }
-                    ]
-                }
-            }
-        -second add the merge and base file to both client/server configs
-            const merge = require("webpack-merge");
-            const baseConfig = require("./webpack.base.js");
-            const config = {...}
-            module.exports = merge(baseConfig, config);
-    --check--
-    commit -m "merging webpack config";
-
-
-    2/ npm-run-all lib to run multiple script inside the script section of package.json
-        "dev" :"npm-run-all --parallel dev:*", //to not confuse the npm run all rename dev:build:server/client => dev:build-server/client
-        --check--
-        commit -m "Single script startup";
-
-    3/webpack-node-externals to escape to bundle the require files like react/express/react-dom (in server side)
-        in webpack.server.js:
-            const webpackNodeExternals = require("webpack-node-externals");
-
-            const config = {
-                ..
-                ..
-                externals : [webpackNodeExternals()] //so any thing inside node_modules do not bundle it
-            }
-        --check-
-        commit 'Ignoring files with webpack (server side)';
-    4/create a helper file called renderer inside Helpers folder to handle the render function for the Home compo
-        helpers/renderer.js :
+    1/ instead of using the traditional express router handler we implement the suport React router (just for displaying perpose html...)
+    with our architecter we use Router.js to handle both browser router and static router (for React Server Side)
+        client/Router.js:
             import React from "react";
-            import { renderToString } from "react-dom/server";
-            import Home from "../client/components/Home";
+            import { Router } from "react-router-dom";
+            import Home from "./components/Home";
 
             export default () => {
-                const content = renderToString(<Home />);
+                return (
+                    <div>
+                        <Router exact path="/" component={Home}>
+                    </div>
+                )
+            }
+
+        client/client.js:
+            import React from "react";
+            import ReactDOM from "react-dom";
+            import {BrowserRouter} from "react-router-dom";
+            import Routes from "./Routes";
+
+            ReactDOM.hydrate(
+                <BrowserRouter>
+                    <Routes/>
+                </BrowserRouter>
+                , document.querySelector("#root"));
+
+        commit "adding routes handler to the client side (BrowserRouter)"
+    2/More configuration in Route config
+        in renderer.js:
+            import React from "react";
+            import { renderToString } from "react-dom/server";
+            import {StaticRouter} from "react-router-dom";
+            import Routes from "../client/Routes";
+
+            export default () => {
+                const content = renderToString(
+                    <StaticRouter context={{}}> //must add the require porp context (here we pass into it empty object)
+                        <Routes/>
+                    </StaticRouter>
+                    );
+
                 return `
                     <html>
-                    <head></head>
-                    <body>
+                        <head></head>
+                        <body>
                         <div id="root">${content}</div>
                         <script src="bundle.js"></script>
-                    </body>
+                        </body>
                     </html>
+                    `;
+            };
+        //to comunicate with the express app route handler we pass the req (user request) to the renderer function and set it as location to Static Router
+            export default (req) => {
+                ..
+                <StaticRouter location={req.path} context={{}}>
 
-                `;
             }
-        in index.js
-            clear :
-                import React from "react";
-                import { renderToString } from "react-dom/server";
-                import Home from "./client/components/Home";
-            add :
-                import renderer from "./helpers/renderer";
+            in index.js => res.send(renderer(req));
 
-                ...
+        commit "Add Routes to Server side with StaticRouter"
 
-                res.send(renderer());
-                ...
+        3/Routing Tiers
+            add some routing to the app
+            in Routes.js
+            ..
+            <Router exact path="/hi" component={() => "hi"}>
+            ..
 
-            commit "Renderer helper"
+            then change app.get("/" .. ) to handle all routes ("*")
+
+            commit "make the express app handle all routes and pass it to react router dom"
+
