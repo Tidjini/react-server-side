@@ -4,13 +4,13 @@ const Home = () => {
   return (
     <div>
       <div>Welcome home</div>
-      <Button
+      <button
         onClick={() => {
           console.log("hi there");
         }}
       >
         Press Me
-      </Button>
+      </button>
     </div>
   );
 };
