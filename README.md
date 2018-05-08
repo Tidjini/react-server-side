@@ -54,4 +54,4 @@
             import ReactDom from "..";
             import Home from "..";
             //add the root id to index.js (server side) <div id="root">${content}</div>
-            RactDom.render(<Home />, document.querySelector("#root"));
+            RactDom.render(<Home />, document.querySelector("#root")); => hydrate
