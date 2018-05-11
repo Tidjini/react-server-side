@@ -1,77 +1,118 @@
 # react-server-side
 
-## next Adding navigation
+## next Integrating support for Redux
 
-    1/ instead of using the traditional express router handler we implement the suport React router (just for displaying perpose html...)
-    with our architecter we use Router.js to handle both browser router and static router (for React Server Side)
-        client/Router.js:
-            import React from "react";
-            import { Router } from "react-router-dom";
-            import Home from "./components/Home";
+    1/add redux libraries in helpers/renderer.js
+        ..
+        import {creatStore, applyMiddleware} from 'redux';
+        import thunk from "redux-thunk";
+        import {Provider} from "react-redux";
+        ...
+    2/create store : const store = createStore(reducers, {} ,applyMiddleware(thunk)); //reducers, state, functions
+    <Provider store={store}>
+        ....
+    </Provider>
+    commit "create the store for redux browser store"
 
-            export default () => {
-                return (
-                    <div>
-                        <Router exact path="/" component={Home}>
-                    </div>
-                )
+    -----
+    3/ for clean code create createStore.js in the helper for the last section, then in the server side entry point (index.js) add it to the renderer function
+    ...
+    import createStore from './helpers/createStore';
+    ...
+
+    app.get("*" ..
+        const store = createStore();
+        //some logic todo and some stuff to load data
+
+        res.send(renderer(req, store));
+
+    modify the renderer.js file :
+        (req, store) => {
+            <Provider store={store}> //import Provider from "react-redux"
+                .....
+            </Provider>
+        }
+
+
+    )
+    commit "create the server store"
+
+    4/create the fetch users action creator
+    in client/actions/index.js
+        import axios from "axios";
+
+        export const FETCH_USERS = "fetchUsers";
+        export const fetchUsers = () => async(dispatch) =>{
+            const res = await axios.get("url");
+
+            dispatch({
+                type : FETCH_USERS,
+                payload : res
+            })
+
+        }
+    commit 'fetch users action'
+
+    5/create the reducers for users
+    client/reducers/userReducer.js
+        import {FETCH_USERS} from '../actions'
+
+        export const (state = [], actions) =>{  
+            switch (actions.type){
+                case FETCH_USERS:
+                    return actions.payload.data;
+                case Default:
+                    return state;
             }
+        }
 
-        client/client.js:
-            import React from "react";
-            import ReactDOM from "react-dom";
-            import {BrowserRouter} from "react-router-dom";
-            import Routes from "./Routes";
+    combine the reducers kin client/reducers/index.js
+        import {combineReducer} from 'redux";
+        import {usersReducer} from "./usersReducers";
 
-            ReactDOM.hydrate(
-                <BrowserRouter>
-                    <Routes/>
-                </BrowserRouter>
-                , document.querySelector("#root"));
+        export default combineReducers({
+            users : usersReducer
+        })
 
-        commit "adding routes handler to the client side (BrowserRouter)"
-    2/More configuration in Route config
-        in renderer.js:
-            import React from "react";
-            import { renderToString } from "react-dom/server";
-            import {StaticRouter} from "react-router-dom";
-            import Routes from "../client/Routes";
+    commit 'add the users reducer '
 
-            export default () => {
-                const content = renderToString(
-                    <StaticRouter context={{}}> //must add the require porp context (here we pass into it empty object)
-                        <Routes/>
-                    </StaticRouter>
-                    );
+    // import the reducer to store..
 
-                return `
-                    <html>
-                        <head></head>
-                        <body>
-                        <div id="root">${content}</div>
-                        <script src="bundle.js"></script>
-                        </body>
-                    </html>
-                    `;
-            };
-        //to comunicate with the express app route handler we pass the req (user request) to the renderer function and set it as location to Static Router
-            export default (req) => {
-                ..
-                <StaticRouter location={req.path} context={{}}>
 
-            }
-            in index.js => res.send(renderer(req));
+    5/create the users list
+        client/comp../UsersList.js
+        ...
+        import  {connect} from "react-redux";
+         {fetchUsers} from "../actions"
+        ..
 
-        commit "Add Routes to Server side with StaticRouter"
+        componentDidMount(){
+            this.props.fetchUsers();
+        }
+        render(){
+            return (
 
-        3/Routing Tiers
-            add some routing to the app
-            in Routes.js
-            ..
-            <Router exact path="/hi" component={() => "hi"}>
-            ..
+                <ul>
+                    {this.renderUsers()}
+                </ul>
+            )
+        }
 
-            then change app.get("/" .. ) to handle all routes ("*")
+        renderUsers(){
+            return this.props.users.map(user => {
+                return <li>{user.name}<li>;
+            })
+        }
 
-            commit "make the express app handle all routes and pass it to react router dom"
 
+
+        const mapStateToProps = (state) => {
+            const {users} = state;
+            return {users};
+        }
+        export default connect (mapStateToProps, {fetchUsers})(UsersList);
+
+        commit with 'set users component'
+
+        //run to test will fail cause of the async await syntax in actions to resolve this
+        import 'babel-polyfill'; in index.js and client.js
