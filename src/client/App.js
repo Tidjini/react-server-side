@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import Header from "./components/Header";
 
-//import { fetchCurrentUser } from "../actions";
+import { fetchCurrentUser } from "./actions";
 
 const App = ({ route }) => {
   return (
@@ -14,15 +14,13 @@ const App = ({ route }) => {
   );
 };
 
-// const mapStateToProps = state => {
-//   const { users } = state;
-//   return { users };
-// };
-
-// function loadData(store) {
-//   return store.dispatch(fetchUsers());
-// }
+const mapStateToProps = ({ curretUser }) => {
+  return {
+    curretUser
+  };
+};
 
 export default {
-  component: connect(null)(App)
+  component: connect(mapStateToProps)(App),
+  loadData: ({ dispatch }) => dispatch.fetchCurrentUser()
 };
