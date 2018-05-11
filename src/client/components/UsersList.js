@@ -19,7 +19,7 @@ const mapStateToProps = state => {
   return { users };
 };
 
-function loadData() {
+function loadData(store) {
   return store.dispatch(fetchUsers());
 }
 export { loadData };
