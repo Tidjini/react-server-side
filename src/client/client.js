@@ -8,13 +8,21 @@ import { Provider } from "react-redux";
 
 import { BrowserRouter } from "react-router-dom";
 import { renderRoutes } from "react-router-config";
+
+//axios for custom client axios instance
+import axios from "axios";
+
 import Routes from "./Routes";
 import reducers from "./reducers";
+
+const axiosInstance = axios.create({
+  baseURL: "/api"
+});
 
 const store = createStore(
   reducers,
   window.INITIAL_STATE,
-  applyMiddleware(thunk)
+  applyMiddleware(thunk.withExtraArgument(axiosInstance))
 );
 ReactDOM.hydrate(
   <Provider store={store}>
