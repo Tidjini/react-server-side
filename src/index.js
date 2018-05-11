@@ -4,6 +4,9 @@ import "babel-polyfill"; //for async await issue
 import express from "express";
 import renderer from "./helpers/renderer";
 import createStore from "./helpers/createStore";
+//for routes
+import { matchRoutes } from "react-router-config";
+import Routes from "./client/Routes";
 
 const app = express();
 app.use(express.static("public"));
@@ -12,6 +15,7 @@ app.use(express.static("public"));
 app.get("*", (req, res) => {
   const store = createStore();
 
+  console.log(matchRoutes(Routes, req.path));
   //do some logic in server side
   //get data ....
 
