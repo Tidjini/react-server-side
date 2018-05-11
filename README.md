@@ -8,7 +8,7 @@
         update the import in Routes
     commit 'refactoring the pages components'
 
-    2/refactoring the component to brinkg the object (export )
+    2/refactoring the component to bring the object (export )
         HomePage.js (use this for UsersList)
         ..
         export default {

@@ -4,13 +4,12 @@ import UsersListPage, { loadData } from "./pages/UsersListPage";
 
 export default [
   {
+    ...HomePage,
     path: "/",
-    component: HomePage,
     exact: true
   },
   {
-    loadData,
-    path: "/users",
-    component: UsersListPage
+    ...UsersListPage,
+    path: "/users"
   }
 ];
