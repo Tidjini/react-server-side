@@ -61,7 +61,7 @@
             }
         ]
 
-        comeback kto App.js and call the renderRoutes (like renderer.js with route.routes props of the App)
+        comeback to App.js and call the renderRoutes (like renderer.js with route.routes props of the App)
         ----RUN TEST --- with H1 header test
         commit 'create the root app.js'
 
