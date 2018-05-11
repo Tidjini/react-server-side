@@ -15,9 +15,9 @@ app.use(express.static("public"));
 app.get("*", (req, res) => {
   const store = createStore();
 
-  console.log(matchRoutes(Routes, req.path));
-  //do some logic in server side
-  //get data ....
+  matchRoutes(Routes, req.path).map(({ route }) => {
+    return route.loadData ? route.loadData() : null;
+  });
 
   res.send(renderer(req, store));
 });
