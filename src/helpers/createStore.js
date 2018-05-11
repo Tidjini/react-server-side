@@ -8,7 +8,9 @@ import {
     Provider
 } from "react-redux";
 
+import reducers from "../client/reducers";
+
 export default () => {
-    const store = createStore(reducer, {}, applyMiddleware(thunk));
+    const store = createStore(reducers, {}, applyMiddleware(thunk));
     return store;
 }
