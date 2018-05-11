@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { renderRoutes } from "react-router-config";
+import Header from "./components/Header";
 
 //import { fetchCurrentUser } from "../actions";
 
 const App = ({ route }) => {
   return (
     <div>
-      <h1>heloo </h1>
+      <Header />
       <div>{renderRoutes(route.routes)}</div>
     </div>
   );
