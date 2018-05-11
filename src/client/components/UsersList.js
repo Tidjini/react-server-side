@@ -20,7 +20,7 @@ const mapStateToProps = state => {
 };
 
 function loadData() {
-  console.log("here we must loading data");
+  return store.dispatch(fetchUsers());
 }
 export { loadData };
 
