@@ -1,77 +1,44 @@
 # react-server-side
 
-## next Server side data loading
+## next Organisation with page component
 
-    1/detecting data load completion problem that the HTML of app get send before component DID MOUNT
-        #A solution one render twice the app (cause some issue auth/complexity ...)
-        #B make sure what we rendering, and bring data
+    1/page and common component organisation
 
-    2/use react-router-config, and convert Routes.js file this approach
-    export default [
-        {
-            path: '/',
-            component : Home,
-            exact: true
-        },
-        {
-            path: '/users',
-            component : UsersList,
-        },
-    ]
-    clean the Route compo
-    commit 'add react-router-config to the app'
+        add pages folder to client and move home and UserList to it => rename to HomePage and UsersPage
+        update the import in Routes
+    commit 'refactoring the pages components'
 
-    3/ update the routes files: we must render the routes inside a div element
-        in renderer.js/client.js replace : <Routes /> by <div>{renderRoutes(Routes)}</div> //import renderRoutes from react-router-config
-        ---RUN TEST---
-    commit 'Update the Routes uses'
-
-    4/ the matchRoute function
-        in the server index.js file :
-            import {matchRoutes} from "react-router-config";
-            import Routes from "./client/Routes";
-
-            ..
-            matchRoutes(Routes, req.path); //console log it
-            ..
-    commit 'Add matchRoute function in server side'
-
-    5/ load data function
-        -add loadData function in the UsersList.js (kjust console log)
-        -import it in Routes.js and in user route add:
-            {
-                loadData,
-                path: '/users',
-                component : UsersList,
-            },
-        ---RUN TEST---
-        in the server index.js
+    2/refactoring the component to brinkg the object (export )
+        HomePage.js (use this for UsersList)
         ..
-        matchRoutes(Routes, req.path).map(({route}) =>{
-            return route.loadData ? route.loadData() : null;
-        });
-        ..
-        ---RUN TEST---
-    commit 'Add the load data function'
-
-    6/ store dispatch
-    change the load data to :
-        function loadData(store){
-            return store.dispatch(fetchUsers()); //this return a promise
+        export default {
+            component: Home
         }
+        ..
+        then in Routes.js
+        {
+            ...HomePage,
+            exact: true,
+            path:'/',
+        }
+        --RUN TEST---
+        commit 'refactoring the load data in home and users list page'
+    3/Dumping the initial state to the Html template
+        in renderers.js
+            ..
+            <script>
+                window.INITIAL_STATE = ${JSON.stringfy(store.getState())}
+            </script>
+            ..
 
-        add store to it in index.js
-        const promises = //...//
-        log it
+            and refer to client.js as initial state createStore(..,window.INITIAL_STATE..)
+        --RUN TEST---
 
-        ---RUN TEST---
-    commit 'store dispatch'
+    commit 'Dumping the initial state to the html template'
+    4/handle the XSS attacks
+    in renderer.js
+        ..
+        import serilaze from "serilize-javascript"; //to not compile js object and use it instead of  JSON.stringfy
+        ..
 
-    7/ waiting for data loading
-    in index.js
-    ....
-    Promise.all(promises).then(() => {
-        res.send(renderer(req.path, store));
-    })
-
-    commit 'waiting for data loading'
+    commit and test
