@@ -1,3 +1,5 @@
+import "babel-polyfill"; //for async await issue
+
 import React from "react";
 import ReactDOM from "react-dom";
 import { createStore, applyMiddleware } from "redux";

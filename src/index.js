@@ -1,3 +1,5 @@
+import "babel-polyfill"; //for async await issue
+
 //turn to a universal javascript
 import express from "express";
 import renderer from "./helpers/renderer";
@@ -10,7 +12,7 @@ app.use(express.static("public"));
 app.get("*", (req, res) => {
   const store = createStore();
 
-  //do some logic in server side 
+  //do some logic in server side
   //get data ....
 
   res.send(renderer(req, store));
