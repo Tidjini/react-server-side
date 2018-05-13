@@ -10,6 +10,7 @@ import { matchRoutes } from "react-router-config";
 //proxy library of express
 import proxy from "express-http-proxy";
 import Routes from "./client/Routes";
+import { rejects } from "assert";
 
 const app = express();
 
@@ -30,9 +31,17 @@ app.use(express.static("public"));
 app.get("*", (req, res) => {
   const store = createStore(req);
 
-  const promises = matchRoutes(Routes, req.path).map(({ route }) => {
-    return route.loadData ? route.loadData(store) : null;
-  });
+  const promises = matchRoutes(Routes, req.path)
+    .map(({ route }) => {
+      return route.loadData ? route.loadData(store) : null;
+    })
+    .map(promise => {
+      if (promise) {
+        return new Promise((resolve, reject) => {
+          promise.then(resolve).catch(resolve);
+        });
+      }
+    });
 
   const render = () => {
     const context = {};
