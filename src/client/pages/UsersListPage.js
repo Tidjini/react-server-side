@@ -7,16 +7,22 @@ class UsersList extends Component {
   componentDidMount() {
     this.props.fetchUsers();
   }
+
+  head() {
+    return (
+      <Helmet>
+        <title>{`${this.props.users.length} Users loaded`}</title>
+        <meta
+          property="og:title"
+          content="Users App List for react ssr (server side rendering)"
+        />
+      </Helmet>
+    );
+  }
   render() {
     return (
       <div>
-        <Helmet>
-          <title>Users List App</title>
-          <meta
-            property="og:title"
-            content="Users App List for react ssr (server side rendering)"
-          />
-        </Helmet>
+        {this.head()}
         Here's a big list of the users:
         <ul>{this.renderUsers()}</ul>
       </div>
