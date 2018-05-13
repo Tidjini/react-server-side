@@ -13,3 +13,5 @@
         - second aproach try to run the app even if we have some errors
 
     4/create a higher order component for require Auth
+        we use redircet compo (react-router-dom) to redirect the user to / if is not login, and we must use the context
+        cause Redirect put some data to the context static route object
