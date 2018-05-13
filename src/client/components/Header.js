@@ -15,7 +15,7 @@ const Header = ({ auth }) => {
         <Link to="/" className="brand-logo">
           React SSR
         </Link>
-        <ul id="nav-mobile" className="right hide-on-med-and-down">
+        <ul className="right">
           <li>
             <Link to="/users">Users</Link>
           </li>
