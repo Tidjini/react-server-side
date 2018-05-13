@@ -34,18 +34,17 @@ app.get("*", (req, res) => {
     return route.loadData ? route.loadData(store) : null;
   });
 
+  const render = () => {
+    const context = {};
+    const content = renderer(req, store, context);
+    if (context.notFound) {
+      res.status(404);
+    }
+    res.send(content);
+  };
   Promise.all(promises)
-    .then(() => {
-      const context = {};
-      const content = renderer(req, store, context);
-      if (context.notFound) {
-        res.status(404);
-      }
-      res.send(content);
-    })
-    .catch(() => {
-      res.send("Something went wrong");
-    });
+    .then(render)
+    .catch(render);
 });
 
 app.listen(3000, () => {

@@ -10,3 +10,4 @@
 
     3/handle the promises errors;
         - catch statement
+        - second aproach try to run the app even if we have some errors
