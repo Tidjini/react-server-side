@@ -1,17 +1,6 @@
 # react-server-side
 
-## next Handling errors
+## next Add some better SEO support
 
-    1/ not found page
-        first create a not found page then attach it to the routes file without any path field
-    2/ informe the browser with 404 status (if page not found)
-        for this we use the context object inside the static router then pass it to not found page as Static Context props
-        manage the notFound field in here then cominucate with index.js
-
-    3/handle the promises errors;
-        - catch statement
-        - second aproach try to run the app even if we have some errors
-
-    4/create a higher order component for require Auth
-        we use redircet compo (react-router-dom) to redirect the user to / if is not login, and we must use the context
-        cause Redirect put some data to the context static route object
+    1/ open graph protocol for the social media sharing content
+    2/ use halmet best approach in React

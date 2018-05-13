@@ -6,6 +6,8 @@ import { StaticRouter } from "react-router-dom";
 import { renderRoutes } from "react-router-config";
 import Routes from "../client/Routes";
 
+import { Helmet } from "react-helmet";
+
 export default (req, store, context) => {
   const content = renderToString(
     <Provider store={store}>
@@ -15,10 +17,12 @@ export default (req, store, context) => {
     </Provider>
   );
 
+  const helmet = Helmet.renderStatic();
   return `
       <html>
         <head>
-
+          ${helmet.title.toString()}
+          ${helmet.meta.toString()}
         </head>
         <body>
           <div id="root">${content}</div>
